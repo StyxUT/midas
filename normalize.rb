@@ -9,14 +9,13 @@ class Normalize
 
     @standard_fields = [
             :amount_requested,
-            :amount_funded_by_investors,
-            :total_amount_funded,
-            :total_amount_funded,
+            # :amount_funded_by_investors,
+            # :total_amount_funded,
             :debt_to_income_ratio,
-            :remaining_principal_funded_by_investors,
-            :payments_to_date_funded_by_investors,
-            :remaining_principal,
-            :payments_to_date,
+            # :remaining_principal_funded_by_investors,
+            # :payments_to_date_funded_by_investors,
+            # :remaining_principal,
+            # :payments_to_date,
             :monthly_income,
             :open_credit_lines,
             :total_credit_lines,
@@ -29,7 +28,7 @@ class Normalize
             :months_since_last_delinquency,
             :public_records_on_file,
             :months_since_last_record,
-            :interest_rate,
+            :interest_rate
          ]
         
     @date_fields = [
@@ -56,6 +55,7 @@ class Normalize
     
     def self.normalize_field(field, use_n_value_field = false)
         update_field = "n_#{field}"
+        Loan.connection.execute("DELETE FROM loans WHERE #{field} is null;") 
 
         if use_n_value_field == true # use normalized fields for calculation values
             value_field = "n_#{field}"
@@ -81,16 +81,19 @@ class Normalize
     # is it just for sequencing?
     # is it even needed?
     def self.normalize_date_field(field)
-         Loan.connection.execute("UPDATE loans SET n_#{field} = DATE_PART('day', #{field} - NOW())/7")
-         normalize_field(field, true)
+        Loan.connection.execute("DELETE FROM loans WHERE #{field} is null;") 
+        Loan.connection.execute("UPDATE loans SET n_#{field} = DATE_PART('day', #{field} - NOW())/7")
+        normalize_field(field, true)
     end
 
     def self.normalize_FICO(field)
+        Loan.connection.execute("DELETE FROM loans WHERE #{field} is null or #{field} = '';") 
         Loan.connection.execute("UPDATE loans SET n_#{field} = CAST(LEFT(#{field}, 3) as float);") 
         normalize_field(field, true)
     end
     
     def self.normalize_employment_length(field_name)
+        Loan.connection.execute("DELETE FROM loans WHERE #{field_name} is null;") 
         Loan.connection.execute("
              UPDATE
                 loans SET n_#{field_name} = 
@@ -114,11 +117,13 @@ class Normalize
     
     def self.normalize_home_ownership(field_name)
         field_options = ["own", "mortgage", "rent"]
+        Loan.connection.execute("DELETE FROM loans WHERE #{field_name} is null;") 
         Loan.connection.execute(create_field_cased_sql(field_name, field_options))
     end
     
     def self.normalize_loan_length(field_name)
         field_options = ["36", "60"]
+        Loan.connection.execute("DELETE FROM loans WHERE #{field_name} is null or #{field_name} = '';") 
         Loan.connection.execute(create_field_cased_sql(field_name, field_options))
     end
     
@@ -137,12 +142,13 @@ class Normalize
     
     def self.normalize_loan_purpose(field_name)
         field_options = ["debt_consolidation", "other", "credit_card", "home_improvement", "small_business", "educational", "vacation", "car", "house", "moving", "wedding"]
-        
+        Loan.connection.execute("DELETE FROM loans WHERE #{field_name} is null or #{field_name} = '';") 
         Loan.connection.execute(create_field_cased_sql(field_name, field_options))
     end
     
     def self.normalize_status(field_name)
         #field_options = ["Charged Off", "Current", "Default", "Fully Paid", "In Grace Period", "In Review", "Issued", "Late (16-30 days)", "Late (31-120 days)", "Performing Playment Plan" ]
+        Loan.connection.execute("DELETE FROM loans WHERE #{field_name} is null or #{field_name} = '';") 
         sql = String.new("UPDATE loans SET n_#{field_name} = CAST ( CASE #{field_name} WHEN 'Fully Paid' THEN 1 WHEN 'Charged Off' THEN -1 ELSE NULL END as integer)")
         
         Loan.connection.execute(sql)
@@ -152,6 +158,7 @@ class Normalize
         # (0..(field_options.length.-1)).each do |i|
         # puts "            t.float :n_#{field_name}_#{field_options[i]} #normalize_#{field_name}"
         # end
+        Loan.connection.execute("DELETE FROM loans WHERE #{field_name} is null or #{field_name} = '';") 
         puts "\n----------------> #{field_name}" if $debug
         
         sql = String.new("UPDATE loans SET\n")

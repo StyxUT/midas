@@ -19,8 +19,12 @@
 # outputs = fann.run([1, 1])
 # puts "Output: #{outputs[0].round}"
 
-class Train
+class NN
     @@training_loans = ActiveRecord::Relation
+ 
+    def self.test(max_epochs, desired_error, hidden_neurons)
+       do_testing(max_epochs, desired_error, hidden_neurons) 
+    end
     
     def self.train(max_epochs, desired_error, hidden_neurons)
        do_training(max_epochs, desired_error, hidden_neurons) 
@@ -29,7 +33,7 @@ class Train
 private
 
     def self.do_training(max_epochs, desired_error, hidden_neurons)
-        @training_loans = load_data.shuffle
+        @training_loans = load_data
         inputs = load_inputs
         outputs = load_outputs
  
@@ -45,9 +49,10 @@ private
            :inputs => inputs,
            :desired_outputs => outputs)
                
-        fann.train_on_data(training_data, max_epochs, 1, desired_error)
+        fann.train_on_data(training_data.shuffle, max_epochs, 1, desired_error)
+        
+        fann.save("training_save")
     end
-    
     
     def self.load_data
         training_loans = Loan.select([
@@ -122,7 +127,7 @@ private
             :n_loan_purpose_car,
             :n_loan_purpose_house,
             :n_loan_purpose_moving
-        ]).where(:n_status => [1, -1]).order(:loan_id).limit(10000)
+        ]).where(:n_status => [1, -1]).order(:loan_id).limit(12000)
         
         return training_loans
     end
