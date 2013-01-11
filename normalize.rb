@@ -25,9 +25,7 @@ class Normalize
             :accounts_now_delinquent,
             :delinquent_amount,
             :delinquencies_last_2_yrs,
-            :months_since_last_delinquency,
             :public_records_on_file,
-            :months_since_last_record,
             :interest_rate
          ]
         
@@ -37,11 +35,17 @@ class Normalize
             # :application_expiration_date, # probably not applicable
             # :issued_date, # probably not applicable
         ]
+        
+    @fields_with_blanks = [
+            :months_since_last_record,
+            :months_since_last_delinquency
+        ]
 
     def self.normalize_values
+        @fields_with_blanks.each {|field| normalize_field_with_blanks(field)}
         @standard_fields.each {|field| normalize_field(field)}
         @date_fields.each {|field| normalize_date_field(field)}
-
+        
         normalize_FICO('fico_range')
         normalize_employment_length('employment_length')
         normalize_home_ownership('home_ownership')
@@ -51,19 +55,19 @@ class Normalize
         normalize_status('status')
     end
    
- #private
+ private
     
     def self.normalize_field(field, use_n_value_field = false)
+        puts "field_name --------------------------------------> #{field}" if $debug
         update_field = "n_#{field}"
-        Loan.connection.execute("DELETE FROM loans WHERE #{field} is null;") 
-
+        puts "Loan Count:  #{Loan.pluck("count(loan_id)")}"
         if use_n_value_field == true # use normalized fields for calculation values
             value_field = "n_#{field}"
         else
             value_field = field
         end
-        
-        puts "field_name --------------------------------------> #{field}" if $debug
+        Loan.connection.execute("DELETE FROM loans WHERE #{field} is null;") 
+
         field_average = Loan.average(value_field)
         puts "field_average -> \t #{field_average}" if $debug
         field_stddev = Loan.pluck("stddev(#{value_field})")[0] # pluck returns an array; grab the first (and only) item
@@ -81,7 +85,7 @@ class Normalize
     # is it just for sequencing?
     # is it even needed?
     def self.normalize_date_field(field)
-        Loan.connection.execute("DELETE FROM loans WHERE #{field} is null;") 
+        Loan.connection.execute("DELETE FROM loans WHERE #{field} is null;")
         Loan.connection.execute("UPDATE loans SET n_#{field} = DATE_PART('day', #{field} - NOW())/7")
         normalize_field(field, true)
     end
@@ -89,6 +93,12 @@ class Normalize
     def self.normalize_FICO(field)
         Loan.connection.execute("DELETE FROM loans WHERE #{field} is null or #{field} = '';") 
         Loan.connection.execute("UPDATE loans SET n_#{field} = CAST(LEFT(#{field}, 3) as float);") 
+        normalize_field(field, true)
+    end
+    
+    def self.normalize_field_with_blanks(field)
+        # if there is no value, set to 13 years (156 months) (~ dataset max)
+        Loan.connection.execute("UPDATE loans SET #{field} = 156 WHERE #{field} is null or #{field} = '';") 
         normalize_field(field, true)
     end
     
@@ -118,12 +128,14 @@ class Normalize
     def self.normalize_home_ownership(field_name)
         field_options = ["own", "mortgage", "rent"]
         Loan.connection.execute("DELETE FROM loans WHERE #{field_name} is null;") 
+        puts "Loan Count:  #{Loan.pluck("count(loan_id)")}"
         Loan.connection.execute(create_field_cased_sql(field_name, field_options))
     end
     
     def self.normalize_loan_length(field_name)
         field_options = ["36", "60"]
         Loan.connection.execute("DELETE FROM loans WHERE #{field_name} is null or #{field_name} = '';") 
+        puts "Loan Count:  #{Loan.pluck("count(loan_id)")}"
         Loan.connection.execute(create_field_cased_sql(field_name, field_options))
     end
     
@@ -149,17 +161,19 @@ class Normalize
     def self.normalize_status(field_name)
         #field_options = ["Charged Off", "Current", "Default", "Fully Paid", "In Grace Period", "In Review", "Issued", "Late (16-30 days)", "Late (31-120 days)", "Performing Playment Plan" ]
         Loan.connection.execute("DELETE FROM loans WHERE #{field_name} is null or #{field_name} = '';") 
+        puts "Loan Count:  #{Loan.pluck("count(loan_id)")}"
+
         sql = String.new("UPDATE loans SET n_#{field_name} = CAST ( CASE #{field_name} WHEN 'Fully Paid' THEN 1 WHEN 'Charged Off' THEN -1 ELSE NULL END as integer)")
         
         Loan.connection.execute(sql)
     end
     
     def self.create_field_cased_sql(field_name, field_options)
+        puts "\n----------------> #{field_name}" if $debug
         # (0..(field_options.length.-1)).each do |i|
         # puts "            t.float :n_#{field_name}_#{field_options[i]} #normalize_#{field_name}"
         # end
         Loan.connection.execute("DELETE FROM loans WHERE #{field_name} is null or #{field_name} = '';") 
-        puts "\n----------------> #{field_name}" if $debug
         
         sql = String.new("UPDATE loans SET\n")
         (0..(field_options.length.-1)).each do |i|

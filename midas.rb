@@ -25,9 +25,9 @@ def show_current_data(ignored)
 end
 
 Import.load_data($raw_data_file)
-`Normalize.normalize_values
+Normalize.normalize_values
 
-NN.train(500, 0.340, [40]) # max_epochs, desired_error, array of hidden node counts
+# NN.train(500, 0.340, [40]) # max_epochs, desired_error, array of hidden node counts
 
 # fann_create_from_file('training_save')
 #fannTest = RubyFann::Standard.new(:filename => 'training_save')
