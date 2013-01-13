@@ -41,7 +41,9 @@ class Normalize
             :months_since_last_delinquency
         ]
 
+    # normalize field in order of the number of records they delete
     def self.normalize_values
+        normalize_status('status')
         @fields_with_blanks.each {|field| normalize_field_with_blanks(field)}
         @standard_fields.each {|field| normalize_field(field)}
         @date_fields.each {|field| normalize_date_field(field)}
@@ -52,7 +54,6 @@ class Normalize
         normalize_loan_length('loan_length')
         normalize_credit_grade('credit_grade')
         normalize_loan_purpose('loan_purpose')
-        normalize_status('status')
     end
    
  private
@@ -98,8 +99,8 @@ class Normalize
     
     def self.normalize_field_with_blanks(field)
         # if there is no value, set to 13 years (156 months) (~ dataset max)
-        Loan.connection.execute("UPDATE loans SET #{field} = 156 WHERE #{field} is null or #{field} = '';") 
-        normalize_field(field, true)
+        Loan.connection.execute("UPDATE loans SET #{field} = 156 WHERE #{field} is null;") 
+        normalize_field(field)
     end
     
     def self.normalize_employment_length(field_name)
@@ -125,21 +126,22 @@ class Normalize
         normalize_field(field_name, true)                                    
     end
     
-    def self.normalize_home_ownership(field_name)
+    def self.normalize_home_ownership(field)
+        puts "field_name --------------------------------------> #{field}" if $debug        
         field_options = ["own", "mortgage", "rent"]
-        Loan.connection.execute("DELETE FROM loans WHERE #{field_name} is null;") 
-        puts "Loan Count:  #{Loan.pluck("count(loan_id)")}"
-        Loan.connection.execute(create_field_cased_sql(field_name, field_options))
+        Loan.connection.execute("DELETE FROM loans WHERE #{field} is null;") 
+        Loan.connection.execute(create_field_cased_sql(field, field_options))
     end
     
-    def self.normalize_loan_length(field_name)
+    def self.normalize_loan_length(field)
+        puts "field_name --------------------------------------> #{field}" if $debug
         field_options = ["36", "60"]
-        Loan.connection.execute("DELETE FROM loans WHERE #{field_name} is null or #{field_name} = '';") 
-        puts "Loan Count:  #{Loan.pluck("count(loan_id)")}"
-        Loan.connection.execute(create_field_cased_sql(field_name, field_options))
-    end
+        Loan.connection.execute("DELETE FROM loans WHERE #{field} is null or #{field} = '';") 
+        Loan.connection.execute(create_field_cased_sql(field, field_options))
+     end
     
-    def self.normalize_credit_grade(field_name)
+    def self.normalize_credit_grade(field)
+        puts "field_name --------------------------------------> #{field}" if $debug
         #create field options and load into array
         field_options = []
             
@@ -148,44 +150,39 @@ class Normalize
                  field_options << "#{letter}#{number}"
              end
         end
-
-        Loan.connection.execute(create_field_cased_sql(field_name, field_options))
+        Loan.connection.execute(create_field_cased_sql(field, field_options))
     end
     
-    def self.normalize_loan_purpose(field_name)
+    def self.normalize_loan_purpose(field)
+        puts "field_name --------------------------------------> #{field}" if $debug
         field_options = ["debt_consolidation", "other", "credit_card", "home_improvement", "small_business", "educational", "vacation", "car", "house", "moving", "wedding"]
-        Loan.connection.execute("DELETE FROM loans WHERE #{field_name} is null or #{field_name} = '';") 
-        Loan.connection.execute(create_field_cased_sql(field_name, field_options))
+        Loan.connection.execute("DELETE FROM loans WHERE #{field} is null or #{field} = '';") 
+        Loan.connection.execute(create_field_cased_sql(field, field_options))
     end
     
-    def self.normalize_status(field_name)
+    def self.normalize_status(field)
+        puts "field_name --------------------------------------> #{field}" if $debug
         #field_options = ["Charged Off", "Current", "Default", "Fully Paid", "In Grace Period", "In Review", "Issued", "Late (16-30 days)", "Late (31-120 days)", "Performing Playment Plan" ]
-        Loan.connection.execute("DELETE FROM loans WHERE #{field_name} is null or #{field_name} = '';") 
+        Loan.connection.execute("DELETE FROM loans WHERE #{field} not in ('Charged Off', 'Fully Paid');")
         puts "Loan Count:  #{Loan.pluck("count(loan_id)")}"
 
-        sql = String.new("UPDATE loans SET n_#{field_name} = CAST ( CASE #{field_name} WHEN 'Fully Paid' THEN 1 WHEN 'Charged Off' THEN -1 ELSE NULL END as integer)")
+        # use 1 for "successful" loans; use -1 for "un-successful" loans
+        sql = String.new("UPDATE loans SET n_#{field} = CAST ( CASE #{field} WHEN 'Fully Paid' THEN 1 WHEN 'Charged Off' THEN -1 ELSE NULL END as integer)")
         
         Loan.connection.execute(sql)
     end
     
-    def self.create_field_cased_sql(field_name, field_options)
-        puts "\n----------------> #{field_name}" if $debug
+    def self.create_field_cased_sql(field, field_options)
         # (0..(field_options.length.-1)).each do |i|
         # puts "            t.float :n_#{field_name}_#{field_options[i]} #normalize_#{field_name}"
         # end
-        Loan.connection.execute("DELETE FROM loans WHERE #{field_name} is null or #{field_name} = '';") 
-        
+        Loan.connection.execute("DELETE FROM loans WHERE #{field} is null or #{field} = '';") 
+        puts "Loan Count:  #{Loan.pluck("count(loan_id)")}"        
         sql = String.new("UPDATE loans SET\n")
         (0..(field_options.length.-1)).each do |i|
-            sql << "\tn_#{field_name}_#{field_options[i]} = CAST( CASE #{field_name} WHEN '#{field_options[i]}' THEN 1 ELSE -1 END as float),\n"
+            sql << "\tn_#{field}_#{field_options[i]} = CAST( CASE #{field} WHEN '#{field_options[i]}' THEN 1 ELSE -1 END as float),\n"
         end
         sql.chomp!(",\n")
-
-        # puts sql if $debug
-        
-        # return sql
     end
-    
-
     
 end
