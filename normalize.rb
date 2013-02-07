@@ -57,7 +57,12 @@ class Normalize
     end
    
  private
+                   
+    def self.save_normalized_values(update_field, field_average, field_stddev)
     
+        Loan.connection.execute("INSERT INTO normalization_values SET #{update_field_avg} = (CAST(#{value_field} as float),  #{update_field_stddev} =  #{field_stddev};") 
+    end
+                       
     def self.normalize_field(field, use_n_value_field = false)
         puts "field_name --------------------------------------> #{field}" if $debug
         update_field = "n_#{field}"
@@ -74,7 +79,9 @@ class Normalize
         field_stddev = Loan.pluck("stddev(#{value_field})")[0] # pluck returns an array; grab the first (and only) item
         puts "field_stddev -> \t #{field_stddev}" if $debug
         
-        # don't devide by 0
+        save_normalized_values(field, field_average, field_stddev)
+        
+        # don't divide by 0
         if field_stddev.to_f != 0
             Loan.connection.execute("UPDATE loans SET #{update_field} = (CAST(#{value_field} as float) - #{field_average}) / #{field_stddev};") 
         end
