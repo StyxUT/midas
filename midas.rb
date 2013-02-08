@@ -1,8 +1,10 @@
 # Categorical Data: http://jamesmccaffrey.wordpress.com/2011/12/17/neural-network-classification-categorical-data-softmax-activation-and-cross-entropy-error/
 $debug = true
-$raw_data_file = '/Users/styxut/Desktop/LoanStats_12-29.csv'
+$raw_data_file = '/Users/styxut/Desktop/LoanStats.csv'
 $save_file_name = 'training_save'
 $bit_fail = 4099
+
+$evaluation_data_file = '/Users/styxut/Desktop/browseNotes.csv'
 ENV['APPLICATION_ENVIRONMENT'] = 'development'
 
  
@@ -22,9 +24,14 @@ ActiveRecord::Base.establish_connection(dbconfig[ENV['APPLICATION_ENVIRONMENT']]
 
 class Loan < ActiveRecord::Base
 end
-                                               
-# Import.load_data($raw_data_file)
-Normalize.normalize_values
+
+class Evaluation_Loan < ActiveRecord::Base
+end
+                                            
+# Import.load_data($raw_data_file, 'training')
+# Normalize.normalize_values
+
+Import.load_data($evaluation_data_file, 'evaluation')
 
 
 # 25.times do |i|

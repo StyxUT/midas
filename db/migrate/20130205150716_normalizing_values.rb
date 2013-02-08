@@ -48,7 +48,7 @@ class NormalizingValues < ActiveRecord::Migration
             t.float :months_since_last_delinquency_stddev #standard_normalization
             t.float :public_records_on_file_stddev #standard_normalization
             t.float :months_since_last_record_stddev #standard_normalization
-  end  
+        end  
   
  end
   
