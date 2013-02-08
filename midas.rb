@@ -22,9 +22,9 @@ ActiveRecord::Base.establish_connection(dbconfig[ENV['APPLICATION_ENVIRONMENT']]
 
 class Loan < ActiveRecord::Base
 end
-
+                                               
 # Import.load_data($raw_data_file)
-# Normalize.normalize_values
+Normalize.normalize_values
 
 
 # 25.times do |i|

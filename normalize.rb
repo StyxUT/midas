@@ -61,6 +61,7 @@ class Normalize
     def self.save_normalized_values(update_field, field_average, field_stddev)
     
         Loan.connection.execute("INSERT INTO normalization_values SET #{update_field_avg} = (CAST(#{value_field} as float),  #{update_field_stddev} =  #{field_stddev};") 
+        puts "Normalization values saved"
     end
                        
     def self.normalize_field(field, use_n_value_field = false)

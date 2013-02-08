@@ -1,3 +1,6 @@
+# rake db:new_migration name=foo_bar_migration
+# edit db/migrate/20081220234130_foo_bar_migration.rb
+
 class InitializeDatabase < ActiveRecord::Migration
   def up
       create_table :loans do |t|

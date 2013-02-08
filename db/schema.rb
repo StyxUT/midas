@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121221070603) do
+ActiveRecord::Schema.define(:version => 20130205150716) do
 
   create_table "loans", :force => true do |t|
     t.integer "loan_id"
@@ -135,6 +135,55 @@ ActiveRecord::Schema.define(:version => 20121221070603) do
     t.float   "n_loan_purpose_house"
     t.float   "n_loan_purpose_moving"
     t.float   "n_loan_purpose_wedding"
+  end
+
+  create_table "normalization_values", :force => true do |t|
+    t.float "amount_requested_avg"
+    t.float "amount_funded_by_investors_avg"
+    t.float "interest_rate_avg"
+    t.float "application_date_avg"
+    t.float "monthly_payment_avg"
+    t.float "total_amount_funded_avg"
+    t.float "debt_to_income_ratio_avg"
+    t.float "remaining_principal_funded_by_investors_avg"
+    t.float "payments_to_date_funded_by_investors_avg"
+    t.float "remaining_principal_avg"
+    t.float "payments_to_date_avg"
+    t.float "monthly_income_avg"
+    t.float "open_credit_lines_avg"
+    t.float "total_credit_lines_avg"
+    t.float "revolving_credit_balance_avg"
+    t.float "revolving_line_utilization_avg"
+    t.float "inquiries_in_the_last_6_months_avg"
+    t.float "accounts_now_delinquent_avg"
+    t.float "delinquent_amount_avg"
+    t.float "delinquencies_last_2_yrs_avg"
+    t.float "months_since_last_delinquency_avg"
+    t.float "public_records_on_file_avg"
+    t.float "months_since_last_record_avg"
+    t.float "amount_requested_stddev"
+    t.float "amount_funded_by_investors_stddev"
+    t.float "interest_rate_stddev"
+    t.float "application_date_stddev"
+    t.float "monthly_payment"
+    t.float "total_amount_funded_stddev"
+    t.float "debt_to_income_ratio_stddev"
+    t.float "remaining_principal_funded_by_investors_stddev"
+    t.float "payments_to_date_funded_by_investors_stddev"
+    t.float "remaining_principal_stddev"
+    t.float "payments_to_date_stddev"
+    t.float "monthly_income_stddev"
+    t.float "open_credit_lines_stddev"
+    t.float "total_credit_lines_stddev"
+    t.float "revolving_credit_balance_stddev"
+    t.float "revolving_line_utilization_stddev"
+    t.float "inquiries_in_the_last_6_months_stddev"
+    t.float "accounts_now_delinquent_stddev"
+    t.float "delinquent_amount_stddev"
+    t.float "delinquencies_last_2_yrs_stddev"
+    t.float "months_since_last_delinquency_stddev"
+    t.float "public_records_on_file_stddev"
+    t.float "months_since_last_record_stddev"
   end
 
 end
