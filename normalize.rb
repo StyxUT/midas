@@ -185,7 +185,7 @@ class Normalize
         # puts "            t.float :n_#{field_name}_#{field_options[i]} #normalize_#{field_name}"
         # end
         Loan.connection.execute("DELETE FROM loans WHERE #{field} is null or #{field} = '';") 
-        puts "Loan Count:  #{Loan.pluck("count(loan_id)")}"        
+            
         sql = String.new("UPDATE loans SET\n")
         (0..(field_options.length.-1)).each do |i|
             sql << "\tn_#{field}_#{field_options[i]} = CAST( CASE #{field} WHEN '#{field_options[i]}' THEN 1 ELSE -1 END as float),\n"
