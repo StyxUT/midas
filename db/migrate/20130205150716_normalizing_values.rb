@@ -1,6 +1,6 @@
-class NormalizingValues < ActiveRecord::Migration
+class TrainingNormalizingValues < ActiveRecord::Migration
   def up
-      create_table :normalization_values do |t|
+      create_table :training_normalization_values do |t|
             t.float :amount_requested_avg  #standard_normalization
             t.float :amount_funded_by_investors_avg #standard_normalization
             t.float :interest_rate_avg #standard_normalization
@@ -54,6 +54,6 @@ class NormalizingValues < ActiveRecord::Migration
   
 
   def down         
-      drop_table :normalization_values  
+      drop_table :training_normalization_values  
   end
 end

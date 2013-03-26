@@ -42,21 +42,32 @@ class Normalize
         ]
 
     # normalize field in order of the number of records they delete
-    def self.normalize_values
-        normalize_status('status')
-        @fields_with_blanks.each {|field| normalize_field_with_blanks(field)}
-        @standard_fields.each {|field| normalize_field(field)}
-        @date_fields.each {|field| normalize_date_field(field)}
-        
-        normalize_FICO('fico_range')
-        normalize_employment_length('employment_length')
-        normalize_home_ownership('home_ownership')
-        normalize_loan_length('loan_length')
-        normalize_credit_grade('credit_grade')
-        normalize_loan_purpose('loan_purpose')
+    def self.normalize_values(normalization_type)
+           normalize_loan_values(normalization_type)
     end
    
  private
+            
+    def self.normalize_loan_values(normalization_type)
+        if normalization_type == 'training'
+            normalize_status('status')
+             @fields_with_blanks.each {|field| normalize_field_with_blanks(field)}
+             @standard_fields.each {|field| normalize_field(field)}
+             @date_fields.each {|field| normalize_date_field(field)}
+
+             normalize_FICO('fico_range')
+             normalize_employment_length('employment_length')
+             normalize_home_ownership('home_ownership')
+             normalize_loan_length('loan_length')
+             normalize_credit_grade('credit_grade')
+             normalize_loan_purpose('loan_purpose')
+        else
+             # normalize evaluation loan values
+             
+             # Notes:  needs to be based off of training's normalized values
+        end
+    end
+   
                    
     def self.save_normalized_values(update_field, field_average, field_stddev)
     

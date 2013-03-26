@@ -26,7 +26,7 @@ class EvaluationLoans < ActiveRecord::Migration
           t.date :credit_pull_d	
           t.date :review_status_d	
           t.string :review_status	
-          t.string :url	
+          t.text :url	
           t.text :desc	
           t.string :purpose	
           t.string :title	

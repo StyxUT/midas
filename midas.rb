@@ -29,7 +29,7 @@ class Evaluation_Loan < ActiveRecord::Base
 end
                                             
 # Import.load_data($raw_data_file, 'training')
-# Normalize.normalize_values
+# Normalize.normalize_values('training')
 
 Import.load_data($evaluation_data_file, 'evaluation')
 
