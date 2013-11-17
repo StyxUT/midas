@@ -1,6 +1,7 @@
+#!/Users/StyxUT/.rbenv/shims ruby 
 # Categorical Data: http://jamesmccaffrey.wordpress.com/2011/12/17/neural-network-classification-categorical-data-softmax-activation-and-cross-entropy-error/
 $debug = true
-$raw_data_file = '/Users/styxut/Desktop/LoanStats.csv'
+$raw_data_file = '/Users/StyxUT/Desktop/LoanStats3b.csv'  #use full path e.g. /Users/StyxUT/Desktop/LoanStats.csv
 $save_file_name = 'training_save'
 $bit_fail = 4099
 
@@ -24,15 +25,16 @@ ActiveRecord::Base.establish_connection(dbconfig[ENV['APPLICATION_ENVIRONMENT']]
 
 class Loan < ActiveRecord::Base
 end
+# 
+# class Evaluation_Loan < ActiveRecord::Base
+# end  
 
-class Evaluation_Loan < ActiveRecord::Base
-end
                                             
-# Import.load_data($raw_data_file, 'training')
-# Normalize.normalize_values('training')
+#Import.load_data($raw_data_file, 'training')
+Normalize.normalize_values('training')
 
-Import.load_data($evaluation_data_file, 'evaluation')
-
+# Import.load_data($evaluation_data_file, 'evaluation')
+# Normalize.mormalize_values('evaluation')
 
 # 25.times do |i|
 #     NN.train(300, 0.30, [90]) # max_epochs, desired_error, array of hidden node counts

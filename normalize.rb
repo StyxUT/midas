@@ -1,6 +1,7 @@
-# connect to database: psql -h localhost
-# use midas database \c midas
-# quit \q
+# connect to server: psql -h localhost
+# connect to midas_development database: \c midas_development
+# lists databases: \list 
+# quit: \q
 
 # sample validation query 
 # select fico_range, employment_length, earliest_credit_line, home_ownership, n_fico_range, n_employment_length, n_earliest_credit_line, n_home_ownership_own, n_home_ownership_mortgage, n_home_ownership_rent, n_loan_length_36, n_loan_length_60 from loans;
@@ -8,22 +9,22 @@
 class Normalize
 
     @standard_fields = [
-            :amount_requested,
-            # :amount_funded_by_investors,
-            # :total_amount_funded,
-            :debt_to_income_ratio,
+            :loan_amnt,
+            # :amnt_funded_by_investors,
+            # :total_amnt_funded,
+            :dti,
             # :remaining_principal_funded_by_investors,
             # :payments_to_date_funded_by_investors,
             # :remaining_principal,
             # :payments_to_date,
-            :monthly_income,
+            :annual_inc,
             :open_credit_lines,
             :total_credit_lines,
             :revolving_credit_balance,
             :revolving_line_utilization,
             :inquiries_in_the_last_6_months,
             :accounts_now_delinquent,
-            :delinquent_amount,
+            :delinquent_amnt,
             :delinquencies_last_2_yrs,
             :public_records_on_file,
             :interest_rate
@@ -37,8 +38,8 @@ class Normalize
         ]
         
     @fields_with_blanks = [
-            :months_since_last_record,
-            :months_since_last_delinquency
+            :mths_since_last_record,
+            :mths_since_last_delinq
         ]
 
     # normalize field in order of the number of records they delete
@@ -50,7 +51,7 @@ class Normalize
             
     def self.normalize_loan_values(normalization_type)
         if normalization_type == 'training'
-            normalize_status('status')
+           #field no longer exists ->mths_ normalize_status('status')
              @fields_with_blanks.each {|field| normalize_field_with_blanks(field)}
              @standard_fields.each {|field| normalize_field(field)}
              @date_fields.each {|field| normalize_date_field(field)}
@@ -63,22 +64,23 @@ class Normalize
              normalize_loan_purpose('loan_purpose')
         else
              # normalize evaluation loan values
-             
+             # normalize_status('status')   # not needed
+             @fields_with_blanks.each {|field| normalize_field_with_blanks(field)}
              # Notes:  needs to be based off of training's normalized values
         end
     end
    
                    
     def self.save_normalized_values(update_field, field_average, field_stddev)
-    
-        Loan.connection.execute("UPDATE normalization_values SET #{update_field}_avg = CAST(#{field_average} as float),  #{update_field}_stddev = CAST(#{field_stddev} as float);") 
+         puts "Field Average: #{field_average}"
+        #Loan.connection.execute("UPDATE normalization_values SET #{update_field}_avg = CAST(#{field_average} as float),  #{update_field}_stddev = CAST(#{field_stddev} as float);") 
         puts "Normalization values saved"
     end
                        
     def self.normalize_field(field, use_n_value_field = false)
         puts "field_name --------------------------------------> #{field}" if $debug
         update_field = "n_#{field}"
-        puts "Loan Count:  #{Loan.pluck("count(loan_id)")}"
+        puts "Loan Count:  #{Loan.pluck("count(id)")}"
         if use_n_value_field == true # use normalized fields for calculation values
             value_field = "n_#{field}"
         else
@@ -183,7 +185,7 @@ class Normalize
         puts "field_name --------------------------------------> #{field}" if $debug
         #field_options = ["Charged Off", "Current", "Default", "Fully Paid", "In Grace Period", "In Review", "Issued", "Late (16-30 days)", "Late (31-120 days)", "Performing Playment Plan" ]
         Loan.connection.execute("DELETE FROM loans WHERE #{field} not in ('Charged Off', 'Fully Paid');")
-        puts "Loan Count:  #{Loan.pluck("count(loan_id)")}"
+        puts "Loan Count:  #{Loan.pluck("count(id)")}"
 
         # use 1 for "successful" loans; use -1 for "un-successful" loans
         sql = String.new("UPDATE loans SET n_#{field} = CAST ( CASE #{field} WHEN 'Fully Paid' THEN 1 WHEN 'Charged Off' THEN -1 ELSE NULL END as integer)")

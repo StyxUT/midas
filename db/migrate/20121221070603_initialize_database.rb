@@ -4,79 +4,139 @@
 class InitializeDatabase < ActiveRecord::Migration
   def up
       create_table :loans do |t|
-          t.integer :loan_id # not used
-          t.float :amount_requested  #standard_normalization
-          t.float :amount_funded_by_investors #standard_normalization
-          t.float :interest_rate #standard_normalization
-          t.string :loan_length #normalize_loan_length_<36 | 60>
-          t.date :application_date #normalize_date_field
-          t.date :application_expiration_date # not used
-          t.date :issued_date # not used
-          t.string :credit_grade #normalize_credit_grad_<a1..g5>
-          t.string :loan_title # not used
-          t.string :loan_purpose 
-          t.text :loan_description # not used
-          t.float :monthly_payment #standard_normalization
-          t.string :status #normalize_status
-          t.float :total_amount_funded #standard_normalization
-          t.float :debt_to_income_ratio #standard_normalization
-          t.float :remaining_principal_funded_by_investors #standard_normalization
-          t.float :payments_to_date_funded_by_investors #standard_normalization
-          t.float :remaining_principal #standard_normalization
-          t.float :payments_to_date #standard_normalization
-          t.string :screen_name # not used
-          t.string :city # not used
-          t.string :state # not used
-          t.string :home_ownership #normaiize_home_ownership_<own | mortgage | rent>
-          t.float :monthly_income #standard_normalization
-          t.string :fico_range #normalize_FICO
-          t.date :earliest_credit_line #normalize_date_field
-          t.float :open_credit_lines #standard_normalization
-          t.float :total_credit_lines #standard_normalization
-          t.float :revolving_credit_balance #standard_normalization
-          t.float :revolving_line_utilization #standard_normalization
-          t.float :inquiries_in_the_last_6_months #standard_normalization
-          t.float :accounts_now_delinquent #standard_normalization
-          t.float :delinquent_amount #standard_normalization
-          t.float :delinquencies_last_2_yrs #standard_normalization
-          t.float :months_since_last_delinquency #standard_normalization
-          t.float :public_records_on_file #standard_normalization
-          t.float :months_since_last_record #standard_normalization
-          t.string :education
-          t.string :employment_length #normalize_employment_length
-          t.integer :code #not used
-          t.string :initial_listing_status #not used
-      
-          # normalized fields
-          t.float :n_amount_requested  #standard_normalization
-          t.float :n_amount_funded_by_investors #standard_normalization
-          t.float :n_interest_rate #standard_normalization
-          t.float :n_application_date #normalize_date_field
-          t.float :n_monthly_payment #standard_normalization
-          t.float :n_total_amount_funded #standard_normalization
-          t.float :n_debt_to_income_ratio #standard_normalization
-          t.float :n_remaining_principal_funded_by_investors #standard_normalization
-          t.float :n_payments_to_date_funded_by_investors #standard_normalization
-          t.float :n_remaining_principal #standard_normalization
-          t.float :n_payments_to_date #standard_normalization
-          t.float :n_monthly_income #standard_normalization
-          t.float :n_fico_range #normalize_FICO
-          t.float :n_earliest_credit_line #normalize_date_field
-          t.float :n_open_credit_lines #standard_normalization
-          t.float :n_total_credit_lines #standard_normalization
-          t.float :n_revolving_credit_balance #standard_normalization
-          t.float :n_revolving_line_utilization #standard_normalization
-          t.float :n_inquiries_in_the_last_6_months #standard_normalization
-          t.float :n_accounts_now_delinquent #standard_normalization
-          t.float :n_delinquent_amount #standard_normalization
-          t.float :n_delinquencies_last_2_yrs #standard_normalization
-          t.float :n_months_since_last_delinquency #standard_normalization
-          t.float :n_public_records_on_file #standard_normalization
-          t.float :n_months_since_last_record #standard_normalization
-          t.string :n_education
-          t.float :n_employment_length #normalize_employment_length
-
-          t.integer :n_status #normalize_status
+          t.integer :id
+            t.integer :member_id
+            t.float :loan_amnt
+            t.float :funded_amnt
+            t.string :term
+            t.float :int_rate
+            t.float :installment
+            t.string :grade
+            t.string :sub_grade
+            t.string :emp_title
+            t.string :emp_length
+            t.string :home_ownership
+            t.integer :annual_inc
+            t.boolean :is_inc_v
+            t.date :accept_d
+            t.date :exp_d
+            t.date :list_d
+            t.date :issue_d
+            t.string :loan_status
+            t.string :pymnt_plan
+            t.string :url
+            t.string :desc
+            t.string :purpose
+            t.string :title
+            t.string :addr_city
+            t.string :addr_state
+            t.integer :acc_now_deliq
+            t.integer :acc_open_past_24mths
+            t.integer :bc_open_to_buy
+            t.float :percent_bc_gt_75
+            t.float :bc_util
+            t.float :dti
+            t.integer :deliq_2yrs
+            t.float :delinq_amnt
+            t.date :earliest_cr_line
+            t.integer :fico_range_low
+            t.integer :fico_range_high
+            t.integer :inq_last_6mths
+            t.integer :mths_since_last_delinq
+            t.integer :mths_since_last_record
+            t.integer :mths_since_recent_inq
+            t.integer :mths_since_recent_loan_delinq
+            t.integer :mths_since_recent_revol_delinq
+            t.integer :mths_since_recent_bc
+            t.integer :mort_acc
+            t.integer :open_acc
+            t.integer :pub_rec_gt_100
+            t.integer :pub_rec
+            t.integer :total_bal_ex_mort
+            t.integer :revol_bal
+            t.float :revol_util
+            t.integer :total_bc_limit
+            t.integer :total_acc
+            t.string :initial_list_status
+            t.float :out_prncp
+            t.float :out_prncp_inv
+            t.float :total_pymnt
+            t.float :total_pymnt_inv
+            t.float :total_rec_prncp
+            t.float :total_rec_int
+            t.float :total_rec_late_fee
+            t.date :last_pymnt_d
+            t.float :last_pymnt_amnt
+            t.date :next_pymnt_d
+            t.date :last_credit_pull_d
+            t.integer :last_fico_range_high
+            t.integer :last_fico_range_low
+            t.integer :total_il_high_credit_limit
+            t.integer :mths_since_oldest_il_open
+            t.integer :num_rev_accts
+            t.integer :mths_since_recent_bc_dlq
+            t.integer :pub_rec_bankruptcies
+            t.integer :num_accts_ever_120_pd
+            t.integer :chargeoff_within_12_mths
+            t.integer :collections_12_mths_ex_med
+            t.integer :tax_liens
+            t.integer :mths_since_last_major_derog
+            t.integer :num_sats
+            t.integer :num_tl_op_past_12m
+            t.integer :mo_sin_rcnt_tl
+            t.integer :tot_hi_cred_lim
+            t.integer :tot_cur_bal
+            t.integer :avg_cur_bal
+            t.integer :num_bc_tl
+            t.integer :num_actv_bc_tl
+            t.integer :num_bc_sats
+            t.integer :pct_tl_nvr_dlq
+            t.integer :num_tl_90g_dpd_24m
+            t.integer :num_tl_30dpd
+            t.integer :num_tl_120dpd_2m
+            t.integer :num_il_tl
+            t.integer :mo_sin_old_il_acct
+            t.integer :num_actv_rev_tl
+            t.integer :mo_sin_old_rev_tl_op
+            t.integer :mo_sin_rcnt_rev_tl_op
+            t.integer :total_rev_hi_lim
+            t.integer :num_rev_tl_bal_gt_0
+            t.integer :num_op_rev_tl
+            t.integer :tot_coll_amt
+            t.integer :policy_code
+          
+          
+              
+          # # normalized fields
+          t.float :loan_amnt  #standard_normalization
+          # t.float :n_amount_funded_by_investors #standard_normalization
+          # t.float :n_interest_rate #standard_normalization
+          # t.float :n_application_date #normalize_date_field
+          # t.float :n_monthly_payment #standard_normalization
+          # t.float :n_total_amount_funded #standard_normalization
+          # t.float :n_debt_to_income_ratio #standard_normalization
+          # t.float :n_remaining_principal_funded_by_investors #standard_normalization
+          # t.float :n_payments_to_date_funded_by_investors #standard_normalization
+          # t.float :n_remaining_principal #standard_normalization
+          # t.float :n_payments_to_date #standard_normalization
+          # t.float :n_monthly_income #standard_normalization
+          # t.float :n_fico_range #normalize_FICO
+          # t.float :n_earliest_credit_line #normalize_date_field
+          # t.float :n_open_credit_lines #standard_normalization
+          # t.float :n_total_credit_lines #standard_normalization
+          # t.float :n_revolving_credit_balance #standard_normalization
+          # t.float :n_revolving_line_utilization #standard_normalization
+          # t.float :n_inquiries_in_the_last_6_months #standard_normalization
+          # t.float :n_accounts_now_delinquent #standard_normalization
+          # t.float :n_delinquent_amount #standard_normalization
+          # t.float :n_delinquencies_last_2_yrs #standard_normalization
+          # t.float :n_months_since_last_delinquency #standard_normalization
+          # t.float :n_public_records_on_file #standard_normalization
+          # t.float :n_months_since_last_record #standard_normalization
+          # t.string :n_education
+          # t.float :n_employment_length #normalize_employment_length
+          # 
+          # t.integer :n_status #normalize_status  
           
           # split normalized
           t.float :n_loan_length_36 #normalize_loan_length
